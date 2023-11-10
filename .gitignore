@@ -1,3 +1,4 @@
 /pal.ini
 */pycache/*
 *.pyc
+/logs

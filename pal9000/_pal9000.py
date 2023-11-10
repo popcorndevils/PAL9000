@@ -29,31 +29,37 @@ class Pal9000:
 
     def setup(self):
         @self.client.tree.command(name="gen", description="Create an image using DALL-E 3.")
-        async def _gen(ctx: discord.interactions.Interaction, prompt: str):
+        async def _gen(ctx: discord.interactions.Interaction, prompt: str, silent: bool = True):
             # Acknowledge interaction and check user authorization
             await ctx.response.defer()
-            if self.check_user(ctx):
-                response = self.painter.generate(prompt)
-                self.costspy.process(ctx, response)
+            try:
+                if self.check_user(ctx):
+                    response = self.painter.generate(prompt)
+                    self.costspy.process(ctx, response)
 
-                # Asynchronous HTTP session to handle image download
-                async with aiohttp.ClientSession() as session:
-                    for image_data in response.data:
-                        image_url = image_data.url  # Modify based on actual response structure
-                        async with session.get(image_url) as resp:
-                            if resp.status == 200:
-                                data = await resp.read()
-                                with BytesIO(data) as image_io:
-                                    img_path = f'{self.random_words.get_random_word()}{self.random_words.get_random_word()}.png'
-                                    # Send the image back to the user
-                                    await ctx.followup.send(
-                                        content=f"Here is the image you requested with this prompt: \n > {prompt}\n\nI have rewritten your prompt and submitted it to DALL-E 3 as:\n> \"{image_data.revised_prompt}\".\n",
-                                        file=discord.File(image_io, img_path, description=img_path),
-                                    )
-                            else:
-                                await ctx.response.send_message("Failed to download image.")
-            else:
-                await ctx.followup.send("You are not authorized to interact with me.")
+                    # Asynchronous HTTP session to handle image download
+                    async with aiohttp.ClientSession() as session:
+                        for image_data in response.data:
+                            image_url = image_data.url  # Modify based on actual response structure
+                            async with session.get(image_url) as resp:
+                                if resp.status == 200:
+                                    data = await resp.read()
+                                    with BytesIO(data) as image_io:
+                                        img_path = f'{self.random_words.get_random_word()}{self.random_words.get_random_word()}.png'
+                                        # Send the image back to the user
+                                        if not silent:
+                                            await ctx.followup.send(
+                                                content=f"\nHere is the image you requested with this prompt: \n > {prompt}\nI have rewritten your prompt and submitted it to DALL-E 3 as:\n> \"{image_data.revised_prompt}\".\n",
+                                                file=discord.File(image_io, img_path),
+                                            )
+                                        else:
+                                            await ctx.followup.send(file=discord.File(image_io, img_path))
+                                else:
+                                    await ctx.followup.send("Failed to download image.")
+                else:
+                    await ctx.followup.send("You are not authorized to interact with me.")
+            except Exception as e:
+                await ctx.followup.send(f"\nI'm sorry, your prompt was rejected due to the following error:\n\n> {e.message}")
 
         @self.client.event
         async def on_ready():
