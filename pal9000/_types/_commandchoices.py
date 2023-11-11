@@ -16,3 +16,9 @@ class ImageCommandChoices:
     class ImageQuality(Enum):
         standard = "standard"
         hd = "hd"
+
+
+class ChatGptChoices:
+    class ChatModel(Enum):
+        GPT_3_5_Turbo = "gpt-3.5-turbo"
+        GPT_4 = "gpt-4"

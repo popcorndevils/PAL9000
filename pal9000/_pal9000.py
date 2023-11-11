@@ -9,7 +9,8 @@ from discord.ext import commands
 from ._pixelpainter import PixelPainter
 from ._banterbox import BanterBox
 from ._costspy import CostSpy
-from ._types import ImageOptions, ImageCommandChoices
+from ._types import ImageOptions, ImageCommandChoices, ChatGptChoices, ChatProfiles
+from ._types._chatmessage import Roles
 
 
 class Pal9000:
@@ -29,7 +30,7 @@ class Pal9000:
         self.setup()
 
     def setup(self):
-        @self.client.tree.command(name="gen", description="Create an image using DALL-E 3.")
+        @self.client.tree.command(name="gen", description="Create images using DALL-E.")
         async def _gen(
             ctx: discord.interactions.Interaction,
             prompt: str,
@@ -67,6 +68,29 @@ class Pal9000:
                                 files = _files)
                         else:
                             await ctx.followup.send(files = _files)
+                else:
+                    await ctx.followup.send("You are not authorized to interact with me.")
+            except Exception as e:
+                await ctx.followup.send(f"\nI'm sorry, your prompt was rejected due to the following error:\n\n> {e.message}")
+
+        @self.client.tree.command(name="ask", description="Ask ChatGPT a quick question without chat context.")
+        async def _ask(
+            ctx: discord.interactions.Interaction,
+            prompt: str,
+            model: ChatGptChoices.ChatModel = ChatGptChoices.ChatModel.GPT_3_5_Turbo
+        ):
+            # Acknowledge interaction and check user authorization
+            await ctx.response.defer()
+
+            try:
+                if self.check_user(ctx):
+                    _question = ChatProfiles["default"]
+                    _question.add_msg(Roles.user, prompt)
+                    response = await self.banter.ask(_question)
+
+                    self.costspy.process(ctx, response, chat_model = model)
+
+                    await ctx.followup.send(response.choices[0].message.content)
                 else:
                     await ctx.followup.send("You are not authorized to interact with me.")
             except Exception as e:

@@ -3,7 +3,7 @@ from ._chatmessage import ChatMessage
 
 class ChatLogs:
     def __init__(self, *msgs):
-        self.msgs = msgs
+        self.msgs = list(msgs)
 
     def to_data(self):
         return [m.to_data() for m in self.msgs]

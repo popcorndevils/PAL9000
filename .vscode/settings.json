@@ -2,8 +2,11 @@
     "cSpell.words": [
         "aiohttp",
         "banterbox",
+        "chatlogs",
+        "chatprofiles",
         "commandchoices",
         "costspy",
+        "imageoptions",
         "openai",
         "pixelpainter"
     ],
