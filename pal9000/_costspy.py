@@ -5,6 +5,8 @@ import json
 from discord.interactions import Interaction
 from openai.types.images_response import ImagesResponse
 
+from ._types import ImageOptions
+
 
 class CostSpy:
     '''
@@ -22,15 +24,13 @@ class CostSpy:
             with open(self.logfile, 'w'):  # Create an empty log file if it doesn't exist
                 pass
 
-    def process(self, ctx: Interaction, response):
-        if isinstance(response, ImagesResponse):
+    def process(self, ctx: Interaction, response, **kwargs):
+        if isinstance(response, ImagesResponse) and "options" in kwargs and isinstance(kwargs["options"], ImageOptions):
+            _options = kwargs["options"]
             with open(self.logfile, "a") as file:
-                _log = {
-                    "type": "dall-e-3",
-                    "user": ctx.user.id,
-                    "datetime": datetime.datetime.now().isoformat(),
-                    "n": len(response.data),
-                }
+                _log = _options.to_data()
+                _log["datetime"] = datetime.datetime.now().isoformat()
+                _log["user"] = ctx.user.id
                 file.writelines(json.dumps(_log) + "\n")
 
     def read_logs(self):

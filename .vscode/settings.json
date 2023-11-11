@@ -2,8 +2,12 @@
     "cSpell.words": [
         "aiohttp",
         "banterbox",
+        "commandchoices",
         "costspy",
         "openai",
         "pixelpainter"
+    ],
+    "cSpell.ignoreWords": [
+        "dall"
     ]
 }

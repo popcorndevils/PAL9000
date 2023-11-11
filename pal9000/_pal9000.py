@@ -9,6 +9,7 @@ from discord.ext import commands
 from ._pixelpainter import PixelPainter
 from ._banterbox import BanterBox
 from ._costspy import CostSpy
+from ._types import ImageOptions, ImageCommandChoices
 
 
 class Pal9000:
@@ -29,14 +30,25 @@ class Pal9000:
 
     def setup(self):
         @self.client.tree.command(name="gen", description="Create an image using DALL-E 3.")
-        async def _gen(ctx: discord.interactions.Interaction, prompt: str, silent: bool = True, n: int = 1):
+        async def _gen(
+            ctx: discord.interactions.Interaction,
+            prompt: str,
+            silent: bool = True,
+            n: int = 1,
+            size: ImageCommandChoices.ImageSize = ImageCommandChoices.ImageSize.size_1024x1024,
+            quality: ImageCommandChoices.ImageQuality = ImageCommandChoices.ImageQuality.standard,
+            model: ImageCommandChoices.DallEModel = ImageCommandChoices.DallEModel.dall_e_3,
+        ):
+
+            _image_options = ImageOptions(model, quality, size, n)
+
             # Acknowledge interaction and check user authorization
             await ctx.response.defer()
             try:
                 if self.check_user(ctx):
                     n = n if n <= 4 else 4
-                    response = await self.painter.generate_multiple(prompt, n)
-                    self.costspy.process(ctx, response)
+                    response = await self.painter.generate_multiple(prompt, _image_options)
+                    self.costspy.process(ctx, response, options = _image_options)
 
                     # Asynchronous HTTP session to handle image download
                     async with aiohttp.ClientSession() as session:
