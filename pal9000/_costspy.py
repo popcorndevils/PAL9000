@@ -25,15 +25,13 @@ class CostSpy:
     def process(self, ctx: Interaction, response):
         if isinstance(response, ImagesResponse):
             with open(self.logfile, "a") as file:
-                _logs = [
-                    {
-                        "type": "dall-e-3",
-                        "user": ctx.user.id,
-                        "datetime": datetime.datetime.now().isoformat()
-                    }
-                    for i in response.data
-                ]
-                file.writelines([json.dumps(log) + "\n" for log in _logs])
+                _log = {
+                    "type": "dall-e-3",
+                    "user": ctx.user.id,
+                    "datetime": datetime.datetime.now().isoformat(),
+                    "n": len(response.data),
+                }
+                file.writelines(json.dumps(_log) + "\n")
 
     def read_logs(self):
         try:

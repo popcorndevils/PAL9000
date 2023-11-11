@@ -29,33 +29,32 @@ class Pal9000:
 
     def setup(self):
         @self.client.tree.command(name="gen", description="Create an image using DALL-E 3.")
-        async def _gen(ctx: discord.interactions.Interaction, prompt: str, silent: bool = True):
+        async def _gen(ctx: discord.interactions.Interaction, prompt: str, silent: bool = True, n: int = 1):
             # Acknowledge interaction and check user authorization
             await ctx.response.defer()
             try:
                 if self.check_user(ctx):
-                    response = self.painter.generate(prompt)
+                    n = n if n <= 4 else 4
+                    response = await self.painter.generate_multiple(prompt, n)
                     self.costspy.process(ctx, response)
 
                     # Asynchronous HTTP session to handle image download
                     async with aiohttp.ClientSession() as session:
+                        _files = []
                         for image_data in response.data:
                             image_url = image_data.url  # Modify based on actual response structure
                             async with session.get(image_url) as resp:
                                 if resp.status == 200:
                                     data = await resp.read()
-                                    with BytesIO(data) as image_io:
-                                        img_path = f'{self.random_words.get_random_word()}{self.random_words.get_random_word()}.png'
-                                        # Send the image back to the user
-                                        if not silent:
-                                            await ctx.followup.send(
-                                                content=f"\nHere is the image you requested with this prompt: \n > {prompt}\nI have rewritten your prompt and submitted it to DALL-E 3 as:\n> \"{image_data.revised_prompt}\".\n",
-                                                file=discord.File(image_io, img_path),
-                                            )
-                                        else:
-                                            await ctx.followup.send(file=discord.File(image_io, img_path))
-                                else:
-                                    await ctx.followup.send("Failed to download image.")
+                                    _files.append(discord.File(
+                                        BytesIO(data),
+                                        f'{self.random_words.get_random_word()}{self.random_words.get_random_word()}.png'))
+                        if not silent:
+                            await ctx.followup.send(
+                                content=f"\nHere is the image you requested with this prompt: \n > {prompt}\".\n",
+                                files = _files)
+                        else:
+                            await ctx.followup.send(files = _files)
                 else:
                     await ctx.followup.send("You are not authorized to interact with me.")
             except Exception as e:
