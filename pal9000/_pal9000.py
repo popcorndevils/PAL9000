@@ -96,6 +96,22 @@ class Pal9000:
             except Exception as e:
                 await ctx.followup.send(f"\nI'm sorry, your prompt was rejected due to the following error:\n\n> {e.message}")
 
+        @self.client.tree.command(name="usage", description="Retrieve Bot usage statistics.")
+        async def _usage(
+            ctx: discord.interactions.Interaction
+        ):
+            # Acknowledge interaction and check user authorization
+            await ctx.response.defer()
+
+            try:
+                if self.check_user(ctx):
+                    self.costspy.generate_usage_stats(ctx)
+                    await ctx.followup.send("Things were calculated.")
+                else:
+                    await ctx.followup.send("You are not authorized to interact with me.")
+            except Exception as e:
+                await ctx.followup.send(f"\nI'm sorry, there was a problem:\n\n> {e.message}")
+
         @self.client.event
         async def on_ready():
             # Set bot status and sync commands upon ready
