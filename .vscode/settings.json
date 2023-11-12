@@ -6,8 +6,10 @@
         "chatprofiles",
         "commandchoices",
         "costspy",
+        "dataframe",
         "imageoptions",
         "openai",
+        "pandabear",
         "pixelpainter"
     ],
     "cSpell.ignoreWords": [

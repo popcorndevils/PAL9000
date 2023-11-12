@@ -105,8 +105,8 @@ class Pal9000:
 
             try:
                 if self.check_user(ctx):
-                    self.costspy.generate_usage_stats(ctx)
-                    await ctx.followup.send("Things were calculated.")
+                    _stats = self.costspy.generate_usage_stats(ctx)
+                    await ctx.followup.send(f"```{_stats.to_string(index = False)}```")
                 else:
                     await ctx.followup.send("You are not authorized to interact with me.")
             except Exception as e:
