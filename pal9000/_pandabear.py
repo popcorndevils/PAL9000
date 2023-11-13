@@ -99,13 +99,13 @@ class PandaBear:
             _chat_data.append({
                 "MODEL": model,
                 "USAGE": f"{data['input_tokens']} Input",
-                "PRICE": f"{data['input_price']}/1000",
+                "PRICE": f"[{data['input_price']}/1000]",
                 "TOTAL": data['input_cost'],
             })
             _chat_data.append({
                 "MODEL": model,
                 "USAGE": f"{data['output_tokens']} Output",
-                "PRICE": f"{data['output_price']}/1000",
+                "PRICE": f"[{data['output_price']}/1000]",
                 "TOTAL": data['output_cost'],
             })
 
@@ -113,7 +113,7 @@ class PandaBear:
         _img_data = [{
             "MODEL": model,
             "USAGE": f"{data['images']} images",
-            "PRICE": f"{data['price']}/image",
+            "PRICE": f"[{data['price']}/image]",
             "TOTAL": data['cost']}
             for model, data in img_costs.items()
         ]
